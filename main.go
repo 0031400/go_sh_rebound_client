@@ -41,13 +41,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	printInfos(nodeInfos)
-	fmt.Println("which do you want to link")
-	targetId := 0
-	fmt.Scanf("%d", &targetId)
-	targetNode := findInfos(nodeInfos, targetId)
-	if targetNode.Id == 0 {
-		log.Panicln("not found node")
+	targetId := chooseTheNodeId(nodeInfos)
+	if targetId == 0 {
+		log.Panicln("choose the node id fail")
 	}
 	c, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%s?id=%d", config.ServerWs, targetId), http.Header{"authorization": []string{config.Auth}})
 	if err != nil {
@@ -81,16 +77,21 @@ func main() {
 		}
 	}
 }
-func findInfos(nodeInfos []NodeInfo, id int) NodeInfo {
-	for _, v := range nodeInfos {
-		if v.Id == id {
-			return v
-		}
+func chooseTheNodeId(nodeInfos []NodeInfo) int {
+	if len(nodeInfos) == 0 {
+		fmt.Println("there is no node connecting with the server")
+		return 0
 	}
-	return NodeInfo{Id: 0}
-}
-func printInfos(nodeInfos []NodeInfo) {
 	for _, v := range nodeInfos {
 		fmt.Printf("id: %03d | addr: %s | hostname: %s\n", v.Id, v.Addr, v.Hostname)
 	}
+	fmt.Println("which do you want to connect")
+	targetId := 0
+	fmt.Scanf("%d", &targetId)
+	for _, v := range nodeInfos {
+		if v.Id == targetId {
+			return targetId
+		}
+	}
+	return 0
 }
